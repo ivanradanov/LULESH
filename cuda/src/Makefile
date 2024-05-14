@@ -9,7 +9,7 @@ OBJECTS2.0 = $(SOURCES2.0:.cu=.o)
 RUNTIME_PATH=/scr/ivan/src/memred/memred-runtimes/trace.cpp
 MEMRED_MEMORY_ANALYSIS_OUT=./.memred.memory.analysis.out
 
-CUDA_PATH=/usr/local/cuda-11.4
+CUDA_PATH=/usr/local/cuda-12.3
 NVCC=clang++
 #NVCC=nvcc
 NVCC_FLAGS= -g -O3 -I. --cuda-path=$(CUDA_PATH) -mllvm --memred-mode=trace
