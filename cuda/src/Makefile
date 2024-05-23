@@ -25,7 +25,7 @@ LDFLAGS = -g -O0 -I$(CUDA_PATH)/include --cuda-path=$(CUDA_PATH) -L$(CUDA_PATH)/
 
 all: $(LULESH_EXEC)
 
-lulesh2.0: $(OBJECTS2.0) $(RUNTIME_PATH)
+lulesh2.0: $(OBJECTS2.0)
 	@echo "Linking"
 	$(LD) $(OBJECTS2.0) $(LDFLAGS) -lm -o $@
 
