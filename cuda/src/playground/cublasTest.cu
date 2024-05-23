@@ -1,3 +1,4 @@
+// Source: https://github.com/NVIDIA/CUDALibrarySamples/blob/master/cuBLAS/utils/cublas_utils.h
 /*
  * Copyright 2020 NVIDIA Corporation.  All rights reserved.
  *
