@@ -1,4 +1,4 @@
-SOURCES = cublasTest.cu
+SOURCES = cublasTest.cu cudaGraphTest.cu
 OBJECTS = $(SOURCES:.cu=.o)
 EXECUTABLES = $(SOURCES:.cu=)
 
@@ -12,7 +12,7 @@ NVCC_FLAGS= -g -O3 -I. --cuda-path=$(CUDA_PATH) -mllvm --memred-mode=trace
 LD=/home/twang/sources/projects/llvm-project2/build/bin/clang++
 LDFLAGS = -g -O0 -I$(CUDA_PATH)/include --cuda-path=$(CUDA_PATH) -L$(CUDA_PATH)/lib64 -lcudart_static -ldl -lpthread -lrt $(RUNTIME_PATH)
 
-all: cublasTest
+all: cublasTest cudaGraphTest
 
 %.o: %.cu
 	@echo "Building $<"
@@ -21,6 +21,10 @@ all: cublasTest
 cublasTest: cublasTest.o
 	@echo "Linking $<"
 	$(LD) $^ $(LDFLAGS) -lcublas -lm -o $@
+
+cudaGraphTest: cudaGraphTest.o
+	@echo "Linking $<"
+	$(LD) $^ $(LDFLAGS) -lm -o $@
 
 clean:
 	rm -f *.o *~ $(OBJECTS) $(EXECUTABLES)
