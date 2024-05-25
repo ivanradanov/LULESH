@@ -113,7 +113,7 @@ void analyzeGraph(cudaGraph_t graph) {
 
     for (const auto &[index, effect] : kernelInfo.ptrArgInfos) {
       std::cout << "  Arg #" << index
-                << " : Effect: " << effect
+                << ": Effect: " << effect
                 << " Value: " << (*static_cast<int **>(params.kernelParams[index]))
                 << std::endl;
     }
