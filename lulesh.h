@@ -530,6 +530,7 @@ class Domain {
 
    std::vector<Real_t> m_elemMass ;  /* mass */
 
+#define const
    // Cutoffs (treat as constants)
    const Real_t  m_e_cut ;             // energy tolerance 
    const Real_t  m_p_cut ;             // pressure tolerance 
@@ -551,8 +552,9 @@ class Domain {
    const Real_t  m_eosvmin ;
    const Real_t  m_pmin ;              // pressure floor 
    const Real_t  m_emin ;              // energy floor 
-   const Real_t  m_dvovmax ;           // maximum allowable volume change 
-   const Real_t  m_refdens ;           // reference density 
+   const Real_t  m_dvovmax ;           // maximum allowable volume change
+   const Real_t m_refdens;             // reference density
+#undef const
 
    // Variables to keep track of timestep, simulation time, and cycle
    Real_t  m_dtcourant ;         // courant constraint 
@@ -592,6 +594,8 @@ class Domain {
    Index_t m_colMin, m_colMax;
    Index_t m_planeMin, m_planeMax ;
 
+ public:
+   void convertToEnzyme();
 } ;
 
 typedef Real_t &(Domain::* Domain_member )(Index_t) ;

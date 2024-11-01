@@ -161,6 +161,20 @@ Additional BSD Notice
 
 #include "lulesh.h"
 
+template <typename fty> fty *__enzyme_truncate_mem_func(fty *, int, int);
+template <typename fty> fty *__enzyme_truncate_op_func(fty *, int, int);
+// template <typename fty> fty *__enzyme_truncate_mem_func(fty *, int, int,
+// int); template <typename fty> fty *__enzyme_truncate_op_func(fty *, int, int,
+// int);
+extern double __enzyme_truncate_mem_value(...);
+extern double __enzyme_expand_mem_value(...);
+
+#define ENZYME_TRUNC_FROM 64
+
+#define ENZYME_TRUNC_TO 32
+#define ENZYME_TRUNC_TO_E 64
+#define ENZYME_TRUNC_TO_M 64
+
 /* Work Routines */
 
 static inline
@@ -2595,6 +2609,99 @@ void CalcTimeConstraintsForElems(Domain& domain) {
    }
 }
 
+void Domain::convertToEnzyme() {
+
+#define TRUNC(X)                                                               \
+   X = __enzyme_truncate_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO)
+   // X = __enzyme_truncate_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO_E,
+   // ENZYME_TRUNC_TO_M)
+
+   TRUNC(m_dtcourant);
+   TRUNC(m_dthydro);
+   TRUNC(m_dtfixed);
+   TRUNC(m_time);
+   TRUNC(m_deltatime);
+   TRUNC(m_deltatimemultlb);
+   TRUNC(m_deltatimemultub);
+   TRUNC(m_dtmax);
+   TRUNC(m_stoptime);
+
+   TRUNC(m_e_cut);
+   TRUNC(m_p_cut);
+   TRUNC(m_q_cut);
+   TRUNC(m_v_cut);
+   TRUNC(m_u_cut);
+   TRUNC(m_hgcoef);
+   TRUNC(m_ss4o3);
+   TRUNC(m_qstop);
+   TRUNC(m_monoq_max_slope);
+   TRUNC(m_monoq_limiter_mult);
+   TRUNC(m_qlc_monoq);
+   TRUNC(m_qqc_monoq);
+   TRUNC(m_qqc);
+   TRUNC(m_eosvmax);
+   TRUNC(m_eosvmin);
+   TRUNC(m_pmin);
+   TRUNC(m_emin);
+   TRUNC(m_dvovmax);
+   TRUNC(m_refdens);
+
+#define TRUNC_VEC(V)                                                           \
+   do {                                                                        \
+      for (int i = 0; i < V.size(); i++) {                                     \
+         TRUNC(V[i]);                                                          \
+      }                                                                        \
+   } while (0)
+
+   TRUNC_VEC(m_e);
+   TRUNC_VEC(m_p);
+   TRUNC_VEC(m_q);
+   TRUNC_VEC(m_ql);
+   TRUNC_VEC(m_qq);
+   TRUNC_VEC(m_v);
+   TRUNC_VEC(m_volo);
+   TRUNC_VEC(m_vnew);
+   TRUNC_VEC(m_delv);
+   TRUNC_VEC(m_vdov);
+   TRUNC_VEC(m_arealg);
+   TRUNC_VEC(m_ss);
+   TRUNC_VEC(m_elemMass);
+   TRUNC_VEC(m_x);
+   TRUNC_VEC(m_y);
+   TRUNC_VEC(m_z);
+   TRUNC_VEC(m_xd);
+   TRUNC_VEC(m_yd);
+   TRUNC_VEC(m_zd);
+   TRUNC_VEC(m_xdd);
+   TRUNC_VEC(m_ydd);
+   TRUNC_VEC(m_zdd);
+   TRUNC_VEC(m_fx);
+   TRUNC_VEC(m_fy);
+   TRUNC_VEC(m_fz);
+   TRUNC_VEC(m_nodalMass);
+
+#undef TRUNC_VEC
+#undef TRUNC
+
+#define ASSERT_NULL(X)                                                         \
+   do {                                                                        \
+      if (X != NULL) {                                                         \
+         std::cerr << "NON NULL FOUND\n";                                      \
+         abort();                                                              \
+      }                                                                        \
+   } while (0)
+   ASSERT_NULL(m_dxx);
+   ASSERT_NULL(m_dyy);
+   ASSERT_NULL(m_dzz);
+   ASSERT_NULL(m_delv_xi);
+   ASSERT_NULL(m_delv_eta);
+   ASSERT_NULL(m_delv_zeta);
+   ASSERT_NULL(m_delx_xi);
+   ASSERT_NULL(m_delx_eta);
+   ASSERT_NULL(m_delx_zeta);
+#undef ASSERT_NULL
+}
+
 /******************************************/
 
 static inline
@@ -2744,8 +2851,22 @@ int main(int argc, char *argv[])
 //      std::cout << "region" << i + 1<< "size" << locDom->regElemSize(i) <<std::endl;
    while((locDom->time() < locDom->stoptime()) && (locDom->cycle() < opts.its)) {
 
-      TimeIncrement(*locDom) ;
-      LagrangeLeapFrog(*locDom) ;
+      TimeIncrement(*locDom);
+      std::cout << "Converting to enzyme\n";
+      std::flush(std::cout);
+      locDom->convertToEnzyme();
+      std::cout << "Running leapfrog\n";
+      std::flush(std::cout);
+      __enzyme_truncate_mem_func(LagrangeLeapFrog, ENZYME_TRUNC_FROM,
+                                 ENZYME_TRUNC_TO)(*locDom);
+      std::cout << "Done leapfrog\n";
+      std::flush(std::cout);
+      // locDom.convertFromEnzyme
+      std::cout << "One it\n";
+      std::flush(std::cout);
+      abort();
+      //__enzyme_truncate_mem_func(LagrangeLeapFrog, ENZYME_TRUNC_FROM,
+      //ENZYME_TRUNC_TO_E, ENZYME_TRUNC_TO_M)(*locDom);
 
       if ((opts.showProg != 0) && (opts.quiet == 0) && (myRank == 0)) {
          std::cout << "cycle = " << locDom->cycle()       << ", "
