@@ -596,6 +596,7 @@ class Domain {
 
  public:
    void convertToEnzyme();
+   void convertFromEnzyme();
 } ;
 
 typedef Real_t &(Domain::* Domain_member )(Index_t) ;

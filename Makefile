@@ -12,7 +12,8 @@ MPI_LIB = /opt/local/lib
 #MPICXX = mpig++ -DUSE_MPI=1
 #CXX = $(MPICXX)
 BUILD_DIR=build.release
-CXX = clang++ -DUSE_MPI=0 -fpass-plugin=/scr/ivan/src/Enzyme/enzyme/$(BUILD_DIR)/Enzyme/ClangEnzyme-16.so -Xclang -load -Xclang /scr/ivan/src/Enzyme/enzyme/$(BUILD_DIR)/Enzyme/ClangEnzyme-16.so -include enzyme/fprt/fprt.h -include enzyme/fprt/mpfr.h -fPIE -lmpfr -lm -g -Rpass=enzyme -O1
+ENZYME_BUILD_DIR=/scr/ivan/src/Enzyme/enzyme/$(BUILD_DIR)/
+CXX = clang++ -DUSE_MPI=0 -fpass-plugin=$(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -Xclang -load -Xclang $(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -include enzyme/fprt/fprt.h -include enzyme/fprt/mpfr.h -fPIE -lmpfr -lm -g -Rpass=enzyme -O3
 
 SOURCES2.0 = \
 	lulesh.cc \
