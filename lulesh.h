@@ -597,6 +597,7 @@ class Domain {
  public:
    void convertToEnzyme();
    void convertFromEnzyme();
+   void markSeen();
 } ;
 
 typedef Real_t &(Domain::* Domain_member )(Index_t) ;

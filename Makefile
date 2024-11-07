@@ -11,9 +11,10 @@ MPI_LIB = /opt/local/lib
 #SERCXX = g++ -DUSE_MPI=0
 #MPICXX = mpig++ -DUSE_MPI=1
 #CXX = $(MPICXX)
+BUILD_DIR=build.debug
 BUILD_DIR=build.release
 ENZYME_BUILD_DIR=/scr/ivan/src/Enzyme/enzyme/$(BUILD_DIR)/
-CXX = clang++ -DUSE_MPI=0 -fpass-plugin=$(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -Xclang -load -Xclang $(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -include enzyme/fprt/fprt.h -include enzyme/fprt/mpfr.h -fPIE -lmpfr -lm -g -Rpass=enzyme -O3
+CXX = clang++ -DUSE_MPI=0 -fpass-plugin=$(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -Xclang -load -Xclang $(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -include enzyme/fprt/fprt.h -include enzyme/fprt/mpfr.h -fPIE -lmpfr -lm -g -Rpass=enzyme -O3 -L$(ENZYME_BUILD_DIR)/Enzyme/Runtimes/FPRT/ -DENZYME_ENABLE_GARBAGE_COLLECTION
 
 SOURCES2.0 = \
 	lulesh.cc \
@@ -26,7 +27,7 @@ OBJECTS2.0 = $(SOURCES2.0:.cc=.o)
 #Default build suggestions with OpenMP for g++
 #CXXFLAGS = -g -O3 -fopenmp -I. -Wall
 CXXFLAGS = -g -O3 -I. -Wall
-LDFLAGS = -g -O3 -fopenmp
+LDFLAGS = -g -O3 -fopenmp  -lEnzyme-FPRT-GC-16
 
 #Below are reasonable default flags for a serial build
 #CXXFLAGS = -g -O3 -I. -Wall

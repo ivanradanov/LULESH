@@ -2701,25 +2701,37 @@ void CalcTimeConstraintsForElems(Domain& domain) {
    } while (0)
 
 #ifdef ENZYME_TRUNC_TO_HIGHER
-#define TRUNC(X)                                                               \
+#define TRUNCATE(X)                                                            \
    X = __enzyme_truncate_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO_E,    \
                                    ENZYME_TRUNC_TO_M)
 #else
-#define TRUNC(X)                                                               \
+#define TRUNCATE(X)                                                            \
    X = __enzyme_truncate_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO)
 #endif
+
+#ifdef ENZYME_TRUNC_TO_HIGHER
+#define EXPAND(X)                                                              \
+   __enzyme_expand_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO_E,          \
+                             ENZYME_TRUNC_TO_M)
+#define EXPAND_SELF(X) X = EXPAND(X)
+#else
+#define EXPAND(X)                                                              \
+   __enzyme_expand_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO)
+#define EXPAND_SELF(X) X = EXPAND(X)
+#endif
+
+#define MARK_SEEN(X) X = enzyme_fprt_gc_mark_seen(X)
+
+#define TRUNC TRUNCATE
 GEN_TRUNC(convertToEnzyme)
 #undef TRUNC
 
-#ifdef ENZYME_TRUNC_TO_HIGHER
-#define TRUNC(X)                                                               \
-   X = __enzyme_expand_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO_E,      \
-                                 ENZYME_TRUNC_TO_M)
-#else
-#define TRUNC(X)                                                               \
-   X = __enzyme_expand_mem_value(X, ENZYME_TRUNC_FROM, ENZYME_TRUNC_TO)
-#endif
+#define TRUNC EXPAND_SELF
 GEN_TRUNC(convertFromEnzyme)
+#undef TRUNC
+
+#define TRUNC MARK_SEEN
+GEN_TRUNC(markSeen)
 #undef TRUNC
 
 #undef ASSERT_NULL
@@ -2872,27 +2884,43 @@ int main(int argc, char *argv[])
 //debug to see region sizes
 //   for(Int_t i = 0; i < locDom->numReg(); i++)
 //      std::cout << "region" << i + 1<< "size" << locDom->regElemSize(i) <<std::endl;
-   while((locDom->time() < locDom->stoptime()) && (locDom->cycle() < opts.its)) {
+   locDom->convertToEnzyme();
+   double time = EXPAND(locDom->time());
+   double deltatime = EXPAND(locDom->deltatime());
+   double stoptime = EXPAND(locDom->stoptime());
+   while ((time < stoptime) && (locDom->cycle() < opts.its)) {
 
-      TimeIncrement(*locDom);
-      locDom->convertToEnzyme();
 #ifdef ENZYME_TRUNC_TO_HIGHER
+      __enzyme_truncate_mem_func(TimeIncrement, ENZYME_TRUNC_FROM,
+                                 ENZYME_TRUNC_TO_E, ENZYME_TRUNC_TO_M)(*locDom);
       __enzyme_truncate_mem_func(LagrangeLeapFrog, ENZYME_TRUNC_FROM,
                                  ENZYME_TRUNC_TO_E, ENZYME_TRUNC_TO_M)(*locDom);
 #else
+      __enzyme_truncate_mem_func(TimeIncrement, ENZYME_TRUNC_FROM,
+                                 ENZYME_TRUNC_TO)(*locDom);
       __enzyme_truncate_mem_func(LagrangeLeapFrog, ENZYME_TRUNC_FROM,
                                  ENZYME_TRUNC_TO)(*locDom);
 #endif
-      locDom->convertFromEnzyme();
-
       if ((opts.showProg != 0) && (opts.quiet == 0) && (myRank == 0)) {
-         std::cout << "cycle = " << locDom->cycle()       << ", "
-                   << std::scientific
-                   << "time = " << double(locDom->time()) << ", "
-                   << "dt="     << double(locDom->deltatime()) << "\n";
+         enzyme_fprt_gc_dump_status();
+      }
+      locDom->markSeen();
+      enzyme_fprt_gc_doit();
+      if ((opts.showProg != 0) && (opts.quiet == 0) && (myRank == 0)) {
+         enzyme_fprt_gc_dump_status();
+      }
+
+      time = EXPAND(locDom->time());
+      deltatime = EXPAND(locDom->deltatime());
+      stoptime = EXPAND(locDom->stoptime());
+      if ((opts.showProg != 0) && (opts.quiet == 0) && (myRank == 0)) {
+         std::cout << "cycle = " << locDom->cycle() << ", " << std::scientific
+                   << "time = " << double(time) << ", "
+                   << "dt=" << double(deltatime) << "\n";
          std::cout.unsetf(std::ios_base::floatfield);
       }
    }
+   locDom->convertFromEnzyme();
 
    // Use reduced max elapsed time
    double elapsed_time;
