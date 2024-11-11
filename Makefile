@@ -14,7 +14,7 @@ MPI_LIB = /opt/local/lib
 BUILD_DIR=build.debug
 BUILD_DIR=build.release
 ENZYME_BUILD_DIR=/scr/ivan/src/Enzyme/enzyme/$(BUILD_DIR)/
-CXX = clang++ -DUSE_MPI=0 -fpass-plugin=$(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -Xclang -load -Xclang $(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -include enzyme/fprt/fprt.h -include enzyme/fprt/mpfr.h -fPIE -lmpfr -lm -g -Rpass=enzyme -O3 -L$(ENZYME_BUILD_DIR)/Enzyme/Runtimes/FPRT/ -DENZYME_ENABLE_GARBAGE_COLLECTION
+CXX = clang++ -DUSE_MPI=0 -fpass-plugin=$(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -Xclang -load -Xclang $(ENZYME_BUILD_DIR)/Enzyme/ClangEnzyme-16.so -include enzyme/fprt/fprt.h -include enzyme/fprt/mpfr.h -fPIE -lmpfr -lm -g -Rpass=enzyme -O3 -L$(ENZYME_BUILD_DIR)/Enzyme/Runtimes/FPRT/ -DENZYME_FPRT_ENABLE_GARBAGE_COLLECTION
 
 SOURCES2.0 = \
 	lulesh.cc \
